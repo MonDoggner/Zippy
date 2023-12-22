@@ -116,6 +116,16 @@ all_dict = {
     "\t": 104
 }
 
+def create_button(button_name:str, button_command) -> customtkinter.CTkButton:
+    button = customtkinter.CTkButton(
+        master=app,
+        width=120,
+        height=32,
+        border_width=0,
+        corner_radius=8,
+        text=f'{button_name}',
+        command=button_command)    
+    button.place(relx=0.5, rely=0.5, anchor=CENTER)
 
 def open_file():
     filepath = filedialog.askopenfilename()
@@ -128,5 +138,7 @@ def open_file():
                     code_list.append(all_dict[i])
         with open("coded_text.txt", "w", encoding= "UTF-8") as new_file: 
             new_file.write(*str(code_list))
+
+create_button('Open', open_file)
 
 app.mainloop()
