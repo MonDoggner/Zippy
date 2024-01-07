@@ -3,167 +3,59 @@ from tkinter import *
 from tkinter import filedialog
 
 app = customtkinter.CTk()  
-app.geometry("800x600")
 app.title("Zippy")
+app.iconbitmap(default="Zippy icon.ico")
+app.geometry("800x600")
+app.resizable(False, False)
 
-#===Переменные===#
-# Словарь со всеми возможными символами для русского языка(к сожалению невозможно сгенерировать).
-all = [
-        "А", 
-        "Б", 
-        "В",
-        "Г",
-        "Д",
-        "Е",
-        "Ё", 
-        "Ж", 
-        "З", 
-        "И", 
-        "Й", 
-        "К", 
-        "Л", 
-        "М", 
-        "Н", 
-        "О", 
-        "П", 
-        "Р", 
-        "С", 
-        "Т", 
-        "У", 
-        "Ф", 
-        "Х", 
-        "Ц", 
-        "Ч", 
-        "Ш", 
-        "Щ", 
-        "Ъ", 
-        "Ы", 
-        "Ь", 
-        "Э", 
-        "Ю",
-        "Я",
-        "а", 
-        "б", 
-        "в", 
-        "г", 
-        "д", 
-        "е", 
-        "ё",
-        "ж", 
-        "з", 
-        "и", 
-        "й", 
-        "к", 
-        "л", 
-        "м", 
-        "н", 
-        "о", 
-        "п", 
-        "р", 
-        "с", 
-        "т", 
-        "у", 
-        "ф", 
-        "х", 
-        "ц", 
-        "ч", 
-        "ш",  
-        "щ", 
-        "ъ", 
-        "ы", 
-        "ь", 
-        "э", 
-        "ю",
-        "я",    
-        " ",
-        ",",
-        ".",
-        "-",
-        "+",
-        "/",
-        "*",
-        "(",
-        ")", 
-        "{",
-        "}",
-        "[",
-        "]",
-        "?",
-        "!",
-        "@",
-        "#",
-        "$",
-        "%",
-        "^",
-        "&",
-        "№",
-        ">",
-        "<",
-        ":",
-        ";",
-        "'",
-        '"',
-        "0",
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "\n",
-        "\t"
-    ]
+app.grid_columnconfigure(1, weight=1)
+app.grid_columnconfigure((2, 3), weight=0)
+app.grid_rowconfigure((0, 1, 2), weight=1)
 
-# Список, куда будут записываться символы из тексте (в виде чисел из словаря)
-code_list = [] 
+sidebar_frame = customtkinter.CTkFrame(app, width=140, corner_radius=0)
+sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
+sidebar_frame.grid_rowconfigure(4, weight=1)
 
-#===Функции===#
-#Функция выводит в терминал числовые значения каждого символа
-def open_file():
+zippy_label = customtkinter.CTkLabel(
+sidebar_frame, 
+text='Zippy', 
+font=('system', 40)
+)
+zippy_label.grid(row=0, column=0, padx=20, pady=(20, 10))
+
+textbox = customtkinter.CTkTextbox(app, width=600)    
+textbox.grid(row=0, column=1, padx=20, pady=10, sticky='n')
+
+def open_and_count():
     filepath = filedialog.askopenfilename()
     if filepath != "":
         with open(filepath, "r", encoding= "UTF-8") as file: 
             data = file.read()
-            print(data) 
-            for i in data:
-                if i in all:
-                    code_list.append(all.index(i))
-            print(*code_list)
-            return code_list
-        
-#Работает пока только на первый символ(сделать для всех)            
-def pop_counter():
-    index_num = 0    
-    counter = 0  
-    temp = code_list[index_num]    
-    for i in code_list:        
-        if i == temp:
-            counter += 1
-            print(counter)
-    print(f'Первый символ встречается {counter}')
+            counter = {}
 
-#===Кнопки приложения===#
+    for i in data:
+        if i in counter:
+            counter[i] += 1
+        else:
+            counter[i] = 1
+
+    for i in counter:
+        print(f'{i} - {counter[i]}')
+
+    textbox.insert(END, 'Подсчёт символов:\n\n')
+    for i in counter:
+        textbox.insert(END, f''''{i}' - {counter[i]}''' + '\n')
+
 open_button = customtkinter.CTkButton(
-    master=app,
-    width=120,
-    height=32,
-    border_width=0,
-    corner_radius=8,
-    text='Open file',
-    command=open_file)    
-open_button.place(relx=0.5, rely=0.4, anchor=CENTER)
-
-pop_button = customtkinter.CTkButton(
-    master=app,
-    width=120,
-    height=32,
-    border_width=0,
-    corner_radius=8,
-    text='Population',
-    command=pop_counter)    
-pop_button.place(relx=0.5, rely=0.5, anchor=CENTER)
+master=app,
+width=100,
+height=25,
+border_width=0,
+corner_radius=8,
+text='Open file',
+font=('system', 20),
+command=open_and_count
+)    
+open_button.place(relx=0.03, rely=0.15, anchor=NW)    
 
 app.mainloop()
