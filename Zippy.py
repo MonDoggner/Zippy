@@ -43,19 +43,25 @@ code_label.grid(row=1, column=1, padx=30, pady=0, sticky='nw')
 code_textbox = customtkinter.CTkTextbox(app, width=600)    
 code_textbox.grid(row=1, column=1, padx=20, pady=35, sticky='nw')
 
-def open_file_func():
+def open_file():
     filepath = filedialog.askopenfilename()
     if filepath != "":
         with open(filepath, "r", encoding= "UTF-8") as file: 
-            data = file.read()
-            counter = {}            
-
+            global data
+            global counter
+            data = file.read()             
+            counter = {}    
+            sym_counter()
+            print_and_sort()  
+                 
+def sym_counter():
     for i in data:
         if i in counter:
             counter[i] += 1
         else:
             counter[i] = 1
 
+def print_and_sort():
     for i in counter:
         counter_textbox.insert(END, f''''{i}' - {counter[i]}''' + '\n')
         temp_keys = [i for i in counter]
@@ -72,7 +78,7 @@ open_file_button = customtkinter.CTkButton(
     corner_radius=8,
     text='Open file',
     font=('system', 20),
-    command=open_file_func
+    command=open_file
 )    
 open_file_button.place(relx=0.025, rely=0.15, anchor=NW)    
 
