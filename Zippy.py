@@ -1,6 +1,17 @@
 import customtkinter
+import heapq
 from tkinter import *
 from tkinter import filedialog
+from collections import Counter, namedtuple
+
+class Node (namedtuple('Node', ['left', 'right'])):
+    def walk(self, code, acc):
+        self.left.walk(code, acc + '0')
+        self.right.walk(code, acc + '1')
+
+class Leaf(namedtuple('Leaf', ['char'])):
+    def walk(self, code, acc):
+        code[self.char] = acc or '0'
 
 app = customtkinter.CTk()  
 app.title("Zippy")
@@ -48,27 +59,15 @@ def open_file():
     if filepath != "":
         with open(filepath, "r", encoding= "UTF-8") as file: 
             global data
-            global counter
-            data = file.read()             
-            counter = {}    
-            sym_counter()
-            print_and_sort()  
-                 
-def sym_counter():
-    for i in data:
-        if i in counter:
-            counter[i] += 1
-        else:
-            counter[i] = 1
-
-def print_and_sort():
-    for i in counter:
-        counter_textbox.insert(END, f''''{i}' - {counter[i]}''' + '\n')
-        temp_keys = [i for i in counter]
-        temp_values = [counter[i] for i in counter]
-
-    print(temp_keys)
-    print(temp_values)
+            global counter            
+            try:
+                data = file.read()             
+                counter = {}    
+                char_counter(data)
+                counter_textbox_print() 
+                code_textbox_print()
+            except Exception:
+                print('Ошибка: что-то пошло не так')
 
 open_file_button = customtkinter.CTkButton(
     master=app,
@@ -80,6 +79,45 @@ open_file_button = customtkinter.CTkButton(
     font=('system', 20),
     command=open_file
 )    
-open_file_button.place(relx=0.025, rely=0.15, anchor=NW)    
+open_file_button.place(relx=0.025, rely=0.15, anchor=NW)
+
+def char_counter(sym_data):
+    for i in sym_data:
+        if i in counter:
+            counter[i] += 1
+        else:
+            counter[i] = 1
+
+def counter_textbox_print():
+    for i in counter:
+        counter_textbox.insert(END, f''''{i}' - {counter[i]}''' + '\n')
+
+def huffman_encode(s):
+    line = []
+
+    for ch, freq in Counter(s).items():
+        line.append((freq, len(line), Leaf(ch)))
+
+    heapq.heapify(line)
+
+    count = len(line)
+    while len(line) > 1:
+        freq1, _count1, left = heapq.heappop(line)
+        freq2, _count2, right = heapq.heappop(line)
+        heapq.heappush(line, (freq1 + freq2, count, Node(left, right)))
+        count += 1
+
+    code = {}
+    if line:
+        [(_freq, _count, root)] = line
+        code = {}
+    root.walk(code, '')
+    
+    return code    
+
+def code_textbox_print():
+    code = huffman_encode(data)
+    for ch in code:
+        code_textbox.insert(END, f''''{ch}' - {code[ch]}''' + '\n')
 
 app.mainloop()
