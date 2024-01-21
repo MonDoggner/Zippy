@@ -1,6 +1,7 @@
 import customtkinter
 import heapq
 from tkinter import *
+from datetime import datetime
 from tkinter import filedialog
 from collections import Counter, namedtuple
 
@@ -12,6 +13,84 @@ class Node (namedtuple('Node', ['left', 'right'])):
 class Leaf(namedtuple('Leaf', ['char'])):
     def walk(self, code, acc):
         code[self.char] = acc or '0'
+
+def char_counter(sym_data):
+    for i in sym_data:
+        if i in counter:
+            counter[i] += 1
+        else:
+            counter[i] = 1
+
+def counter_textbox_print():
+    for i in counter:
+        counter_textbox.insert(END, f''''{i}' - {counter[i]}''' + '\n')
+
+def code_textbox_print():
+    code = huffman_encode(data)
+    for ch in code:
+        code_textbox.insert(END, f''''{ch}' - {code[ch]}''' + '\n')
+
+def huffman_encode(data):
+    line = []
+
+    for ch, freq in Counter(data).items():
+        line.append((freq, len(line), Leaf(ch)))
+
+    heapq.heapify(line)
+
+    count = len(line)
+    while len(line) > 1:
+        freq1, _count1, left = heapq.heappop(line)
+        freq2, _count2, right = heapq.heappop(line)
+        heapq.heappush(line, (freq1 + freq2, count, Node(left, right)))
+        count += 1
+
+    code = {}
+    if line:
+        [(_freq, _count, root)] = line
+        code = {}
+    root.walk(code, '')
+    
+    return code  
+
+def open_file():
+    filepath = filedialog.askopenfilename()
+    if filepath != "":
+        with open(filepath, "r", encoding= "UTF-8") as file: 
+            global data
+            global counter            
+            try:
+                data = file.read()             
+                counter = {}    
+                char_counter(data)
+                counter_textbox_print() 
+                code_textbox_print()
+                with open('logs.txt', 'a', encoding='UTF-8') as logs:
+                    logs.write(f'{datetime.now()}\nУспешное кодирование {filepath}\n\n')
+            except Exception as e:
+                with open('logs.txt', 'a', encoding='UTF-8') as logs:
+                    logs.write(f'{datetime.now()}\nОшибка:{e}\n\n')
+
+def logs_textbox_print(data):
+    code_textbox.insert(END, f''''{data}''' + '\n')
+
+def logs_open():   
+
+    counter_label.destroy()
+    counter_textbox.destroy()
+    code_label.destroy()
+    code_textbox.destroy()
+
+    logs_label = customtkinter.CTkLabel(
+        app, 
+        text='История', 
+        font=('system', 22)
+    )
+    logs_label.grid(row=1, column=1, padx=30, pady=0, sticky='nw')
+
+    logs_textbox = customtkinter.CTkTextbox(app, width=600)    
+    logs_textbox.grid(row=1, column=1, padx=20, pady=35, sticky='nw')
+
 
 app = customtkinter.CTk()  
 app.title("Zippy")
@@ -54,21 +133,6 @@ code_label.grid(row=1, column=1, padx=30, pady=0, sticky='nw')
 code_textbox = customtkinter.CTkTextbox(app, width=600)    
 code_textbox.grid(row=1, column=1, padx=20, pady=35, sticky='nw')
 
-def open_file():
-    filepath = filedialog.askopenfilename()
-    if filepath != "":
-        with open(filepath, "r", encoding= "UTF-8") as file: 
-            global data
-            global counter            
-            try:
-                data = file.read()             
-                counter = {}    
-                char_counter(data)
-                counter_textbox_print() 
-                code_textbox_print()
-            except Exception:
-                print('Ошибка: что-то пошло не так')
-
 open_file_button = customtkinter.CTkButton(
     master=app,
     width=100,
@@ -81,43 +145,16 @@ open_file_button = customtkinter.CTkButton(
 )    
 open_file_button.place(relx=0.025, rely=0.15, anchor=NW)
 
-def char_counter(sym_data):
-    for i in sym_data:
-        if i in counter:
-            counter[i] += 1
-        else:
-            counter[i] = 1
-
-def counter_textbox_print():
-    for i in counter:
-        counter_textbox.insert(END, f''''{i}' - {counter[i]}''' + '\n')
-
-def huffman_encode(s):
-    line = []
-
-    for ch, freq in Counter(s).items():
-        line.append((freq, len(line), Leaf(ch)))
-
-    heapq.heapify(line)
-
-    count = len(line)
-    while len(line) > 1:
-        freq1, _count1, left = heapq.heappop(line)
-        freq2, _count2, right = heapq.heappop(line)
-        heapq.heappush(line, (freq1 + freq2, count, Node(left, right)))
-        count += 1
-
-    code = {}
-    if line:
-        [(_freq, _count, root)] = line
-        code = {}
-    root.walk(code, '')
-    
-    return code    
-
-def code_textbox_print():
-    code = huffman_encode(data)
-    for ch in code:
-        code_textbox.insert(END, f''''{ch}' - {code[ch]}''' + '\n')
+logs_button = customtkinter.CTkButton(
+    master=app,
+    width=100,
+    height=25,
+    border_width=0,
+    corner_radius=8,
+    text='Logs',
+    font=('system', 20),
+    command=logs_open
+)    
+logs_button.place(relx=0.025, rely=0.2, anchor=NW)
 
 app.mainloop()
