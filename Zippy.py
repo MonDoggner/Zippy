@@ -67,9 +67,9 @@ def open_file():
                 code_textbox_print()
                 with open('logs.txt', 'a', encoding='UTF-8') as logs:
                     logs.write(f'{datetime.now()}\nУспешное кодирование {filepath}\n\n')
-            except Exception as e:
+            except UnicodeDecodeError:
                 with open('logs.txt', 'a', encoding='UTF-8') as logs:
-                    logs.write(f'{datetime.now()}\nОшибка:{e}\n\n')
+                    logs.write(f'{datetime.now()}\nОшибка: Выбран не текстовый файл\n\n')
 
 def logs_textbox_print(data):
     code_textbox.insert(END, f''''{data}''' + '\n')
