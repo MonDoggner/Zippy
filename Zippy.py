@@ -1,3 +1,4 @@
+from typing import Optional, Tuple, Union
 import customtkinter
 import heapq
 from tkinter import *
@@ -14,126 +15,154 @@ class Leaf(namedtuple('Leaf', ['char'])):
     def walk(self, code, acc):
         code[self.char] = acc or '0'
 
-def char_counter(sym_data):
-    for i in sym_data:
-        if i in counter:
-            counter[i] += 1
+class App(customtkinter.CTk):
+    '''
+    Класс, который создаёт "основу" приложения
+    '''
+    def __init__(self, app_name: str, app_icon: str, app_size: str, app_resizable: bool):
+        super().__init__()
+
+        self.app_name = app_name
+        self.app_icon = app_icon
+        self.app_size = app_size
+        self.app_resizable = app_resizable
+
+        self.title(f'{self.app_name}')
+        self.iconbitmap(default=f'{self.app_icon}')
+        self.geometry(f'{self.app_size}')
+
+        if self.app_resizable == True:
+            self.resizable()
         else:
-            counter[i] = 1
+            self.resizable(False, False)
 
-def counter_textbox_print():
-    for i in counter:
-        counter_textbox.insert(END, f''''{i}' - {counter[i]}''' + '\n')
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure((2, 3), weight=0)
+        self.grid_rowconfigure((0, 1, 2), weight=1)
 
-def code_textbox_print():
-    code = huffman_encode(data)
-    for ch in code:
-        code_textbox.insert(END, f''''{ch}' - {code[ch]}''' + '\n')
+        self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
+        self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
+        self.sidebar_frame.grid_rowconfigure(4, weight=1)
 
-def huffman_encode(data):
-    line = []
+        self.app_logo = customtkinter.CTkLabel(
+            self.sidebar_frame, 
+            text=f'{self.app_name}', 
+            font=('system', 40)
+        )
+        self.app_logo.grid(row=0, column=0, padx=20, pady=(20, 10))
 
-    for ch, freq in Counter(data).items():
-        line.append((freq, len(line), Leaf(ch)))
+app = App(
+    app_name='Zippy', 
+    app_icon='Zippy icon.ico', 
+    app_size='900x700', 
+    app_resizable=False
+)
 
-    heapq.heapify(line)
+class FirstScreen(App):
+    def __init__(self, app_name: str, app_icon: str, app_size: str, app_resizable: bool):
+        super().__init__(app_name, app_icon, app_size, app_resizable)
 
-    count = len(line)
-    while len(line) > 1:
-        freq1, _count1, left = heapq.heappop(line)
-        freq2, _count2, right = heapq.heappop(line)
-        heapq.heappush(line, (freq1 + freq2, count, Node(left, right)))
-        count += 1
+        self.counter_label = customtkinter.CTkLabel(
+            app, 
+            text='Подсчёт символов', 
+            font=('system', 22)
+        )
+        self.counter_label.grid(row=0, column=1, padx=30, pady=20, sticky='nw')
 
-    code = {}
-    if line:
-        [(_freq, _count, root)] = line
+        self.counter_textbox = customtkinter.CTkTextbox(app, width=600)    
+        self.counter_textbox.grid(row=0, column=1, padx=20, pady=55, sticky='nw')
+
+        self.code_label = customtkinter.CTkLabel(
+            app, 
+            text='Кодирование', 
+            font=('system', 22)
+        )
+        self.code_label.grid(row=1, column=1, padx=30, pady=0, sticky='nw')
+
+        self.code_textbox = customtkinter.CTkTextbox(app, width=600)    
+        self.code_textbox.grid(row=1, column=1, padx=20, pady=35, sticky='nw')
+
+    def open_file(self):
+        filepath = filedialog.askopenfilename()
+        if filepath != "":
+            with open(filepath, "r", encoding= "UTF-8") as file: 
+                global data
+                global counter            
+                try:
+                    data = file.read()             
+                    counter = {}    
+                    self.char_counter(data)
+                    self.counter_textbox_print() 
+                    self.code_textbox_print()
+                    with open('logs.txt', 'a', encoding='UTF-8') as logs:
+                        logs.write(f'{datetime.now()}\nУспешное кодирование {filepath}\n\n')
+                except Exception as e:
+                    with open('logs.txt', 'a', encoding='UTF-8') as logs:
+                        logs.write(f'{datetime.now()}\nОшибка:{e}\n\n')
+
+    def char_counter(char_data):
+        for i in char_data:
+            if i in counter:
+                counter[i] += 1
+            else:
+                counter[i] = 1
+
+    def counter_textbox_print(self):
+        for i in counter:
+            self.counter_textbox.insert(END, f''''{i}' - {counter[i]}''' + '\n')
+
+    def code_textbox_print(self):
+        code = self.huffman_encode(data)
+        for ch in code:
+            self.code_textbox.insert(END, f''''{ch}' - {code[ch]}''' + '\n')    
+
+    def huffman_encode(data):
+        line = []
+
+        for ch, freq in Counter(data).items():
+            line.append((freq, len(line), Leaf(ch)))
+
+        heapq.heapify(line)
+
+        count = len(line)
+        while len(line) > 1:
+            freq1, _count1, left = heapq.heappop(line)
+            freq2, _count2, right = heapq.heappop(line)
+            heapq.heappush(line, (freq1 + freq2, count, Node(left, right)))
+            count += 1
+
         code = {}
-    root.walk(code, '')
+        if line:
+            [(_freq, _count, root)] = line
+            code = {}
+        root.walk(code, '')
+        
+        return code 
     
-    return code  
+    def destroyer(self):
+        self.counter_label.destroy()
+        self.counter_textbox.destroy()
+        self.code_label.destroy()
+        self.code_textbox.destroy()
 
-def open_file():
-    filepath = filedialog.askopenfilename()
-    if filepath != "":
-        with open(filepath, "r", encoding= "UTF-8") as file: 
-            global data
-            global counter            
-            try:
-                data = file.read()             
-                counter = {}    
-                char_counter(data)
-                counter_textbox_print() 
-                code_textbox_print()
-                with open('logs.txt', 'a', encoding='UTF-8') as logs:
-                    logs.write(f'{datetime.now()}\nУспешное кодирование {filepath}\n\n')
-            except Exception as e:
-                with open('logs.txt', 'a', encoding='UTF-8') as logs:
-                    logs.write(f'{datetime.now()}\nОшибка:{e}\n\n')
+def logs_textbox_print(self, data):
+    self.logs_textbox.insert(END, f''''{data}''' + '\n')
 
-def logs_textbox_print(data):
-    code_textbox.insert(END, f''''{data}''' + '\n')
+def logs_open(self):   
 
-def logs_open():   
-
-    counter_label.destroy()
-    counter_textbox.destroy()
-    code_label.destroy()
-    code_textbox.destroy()
+    self.destroyer()  
 
     logs_label = customtkinter.CTkLabel(
         app, 
         text='История', 
         font=('system', 22)
     )
-    logs_label.grid(row=1, column=1, padx=30, pady=0, sticky='nw')
+    logs_label.grid(row=1, column=1, padx=100, pady=0, sticky='nw')
 
     logs_textbox = customtkinter.CTkTextbox(app, width=600)    
-    logs_textbox.grid(row=1, column=1, padx=20, pady=35, sticky='nw')
+    logs_textbox.grid(row=1, column=1, padx=100, pady=35, sticky='nws')
 
-
-app = customtkinter.CTk()  
-app.title("Zippy")
-app.iconbitmap(default="Zippy icon.ico")
-app.geometry("900x700")
-app.resizable(False, False)
-
-app.grid_columnconfigure(1, weight=1)
-app.grid_columnconfigure((2, 3), weight=0)
-app.grid_rowconfigure((0, 1, 2), weight=1)
-
-sidebar_frame = customtkinter.CTkFrame(app, width=140, corner_radius=0)
-sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
-sidebar_frame.grid_rowconfigure(4, weight=1)
-
-zippy_logo = customtkinter.CTkLabel(
-    sidebar_frame, 
-    text='Zippy', 
-    font=('system', 40)
-)
-zippy_logo.grid(row=0, column=0, padx=20, pady=(20, 10))
-
-counter_label = customtkinter.CTkLabel(
-    app, 
-    text='Подсчёт символов', 
-    font=('system', 22)
-)
-counter_label.grid(row=0, column=1, padx=30, pady=20, sticky='nw')
-
-counter_textbox = customtkinter.CTkTextbox(app, width=600)    
-counter_textbox.grid(row=0, column=1, padx=20, pady=55, sticky='nw')
-
-code_label = customtkinter.CTkLabel(
-    app, 
-    text='Кодирование', 
-    font=('system', 22)
-)
-code_label.grid(row=1, column=1, padx=30, pady=0, sticky='nw')
-
-code_textbox = customtkinter.CTkTextbox(app, width=600)    
-code_textbox.grid(row=1, column=1, padx=20, pady=35, sticky='nw')
-
-open_file_button = customtkinter.CTkButton(
+open_file_button = FirstScreen(
     master=app,
     width=100,
     height=25,
@@ -145,7 +174,7 @@ open_file_button = customtkinter.CTkButton(
 )    
 open_file_button.place(relx=0.025, rely=0.15, anchor=NW)
 
-logs_button = customtkinter.CTkButton(
+logs_button = FirstScreen(
     master=app,
     width=100,
     height=25,
