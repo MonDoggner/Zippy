@@ -5,6 +5,7 @@ from tkinter import *
 from datetime import datetime
 from tkinter import filedialog
 
+#стандартное создание окна приложения
 app = customtkinter.CTk()  
 app.title("Zippy")
 app.iconbitmap(default="Zippy icon.ico")
@@ -25,6 +26,7 @@ counter_textbox.grid(row=0, column=1, padx=20, pady=55, sticky='nw')
 code_textbox = customtkinter.CTkTextbox(app, width=600)    
 code_textbox.grid(row=1, column=1, padx=20, pady=35, sticky='nw')
 
+#подписи
 zippy_logo = AppTools.Labels(
     label_master=sidebar_frame, 
     label_name='Zippy', 
@@ -56,24 +58,7 @@ code_label = AppTools.Labels(
     label_sticky='nw' 
 )
 
-def open_file():
-    filepath = filedialog.askopenfilename()
-    if filepath != "":
-        with open(filepath, "r", encoding= "UTF-8") as file: 
-            global data
-            global counter            
-            try:
-                data = file.read()             
-                counter = {}    
-                char_counter(data)
-                counter_textbox_print() 
-                code_textbox_print()
-                with open('logs.txt', 'a', encoding='UTF-8') as logs:
-                    logs.write(f'{datetime.now()}\nУспешное кодирование {filepath}\n\n')
-            except UnicodeDecodeError:
-                with open('logs.txt', 'a', encoding='UTF-8') as logs:
-                    logs.write(f'{datetime.now()}\nОшибка: Выбран не текстовый файл\n\n')
-
+#функции
 def char_counter(sym_data):
     for i in sym_data:
         if i in counter:
@@ -93,12 +78,40 @@ def code_textbox_print():
 def logs_textbox_print(data):
     code_textbox.insert(END, f''''{data}''' + '\n')
 
+def open_file():
+    filepath = filedialog.askopenfilename()
+    if filepath != "":
+        with open(filepath, "r", encoding= "UTF-8") as file: 
+            global data
+            global counter            
+            try:
+                data = file.read()             
+                counter = {}    
+                char_counter(data)
+                counter_textbox_print() 
+                code_textbox_print()
+                with open('logs.txt', 'a', encoding='UTF-8') as logs:
+                    logs.write(f'{datetime.now()}\nУспешное кодирование {filepath}\n\n')
+            except UnicodeDecodeError:
+                with open('logs.txt', 'a', encoding='UTF-8') as logs:
+                    logs.write(f'{datetime.now()}\nОшибка: Выбран не текстовый файл\n\n')
+
+#кнопки
 open_file_button = AppTools.Buttons(
     button_master=app,
     button_name='Open file',
     button_func=open_file,
     button_relx=0.025,
     button_rely=0.15,
+    button_anchor=NW
+)  
+
+save_file_button = AppTools.Buttons(
+    button_master=app,
+    button_name='Save file',
+    button_func=open_file,
+    button_relx=0.025,
+    button_rely=0.2,
     button_anchor=NW
 )  
 
