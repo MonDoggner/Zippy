@@ -1,5 +1,4 @@
-import AppTools #самописная библиотека (Надстройка для customtkinter)
-import Huffman #самописная библиотека (Алгоритм Хаффмана)
+import AppTools #самописный пакет
 import customtkinter
 from tkinter import *
 from datetime import datetime
@@ -71,7 +70,7 @@ def counter_textbox_print():
         counter_textbox.insert(END, f''''{i}' - {counter[i]}''' + '\n')
 
 def code_textbox_print():
-    code = Huffman.encode(data)
+    code = AppTools.encode(data)
     for ch in code:
         code_textbox.insert(END, f''''{ch}' - {code[ch]}''' + '\n')
 
@@ -90,10 +89,10 @@ def open_file():
                 char_counter(data)
                 counter_textbox_print() 
                 code_textbox_print()
-                with open('logs.txt', 'a', encoding='UTF-8') as logs:
+                with open('AppTools\\logs.txt', 'a', encoding='UTF-8') as logs:
                     logs.write(f'{datetime.now()}\nУспешное кодирование {filepath}\n\n')
             except UnicodeDecodeError:
-                with open('logs.txt', 'a', encoding='UTF-8') as logs:
+                with open('AppTools\\logs.tx', 'a', encoding='UTF-8') as logs:
                     logs.write(f'{datetime.now()}\nОшибка: Выбран не текстовый файл\n\n')
 
 #кнопки
