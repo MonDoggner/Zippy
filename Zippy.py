@@ -7,7 +7,7 @@ from tkinter import filedialog
 #стандартное создание окна приложения
 app = customtkinter.CTk()  
 app.title("Zippy")
-app.iconbitmap(default="Zippy icon.ico")
+app.iconbitmap(default="AppTools\\Zippy icon.ico")
 app.geometry("900x700")
 app.resizable(False, False)
 
@@ -95,6 +95,20 @@ def open_file():
                 with open('AppTools\\logs.tx', 'a', encoding='UTF-8') as logs:
                     logs.write(f'{datetime.now()}\nОшибка: Выбран не текстовый файл\n\n')
 
+def save_file():
+    filepath = filedialog.asksaveasfilename()
+    if filepath != "":
+        code = AppTools.encode(data)
+        encoded = ''.join(code[ch] for ch in data)
+        with open(filepath, "w") as file:
+            try:
+                file.write(encoded)
+                with open('AppTools\\logs.txt', 'a', encoding='UTF-8') as logs:
+                    logs.write(f'{datetime.now()}\nУспешное сохранение {filepath}\n\n')
+            except Exception:
+                with open('AppTools\\logs.tx', 'a', encoding='UTF-8') as logs:
+                    logs.write(f'{datetime.now()}\nОшибка: Что-то пошло не так\n\n')
+
 #кнопки
 open_file_button = AppTools.Buttons(
     button_master=app,
@@ -108,7 +122,7 @@ open_file_button = AppTools.Buttons(
 save_file_button = AppTools.Buttons(
     button_master=app,
     button_name='Save file',
-    button_func=open_file,
+    button_func=save_file,
     button_relx=0.025,
     button_rely=0.2,
     button_anchor=NW
