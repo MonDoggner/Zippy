@@ -74,9 +74,6 @@ def code_textbox_print():
     for ch in code:
         code_textbox.insert(END, f''''{ch}' - {code[ch]}''' + '\n')
 
-def logs_textbox_print(data):
-    code_textbox.insert(END, f''''{data}''' + '\n')
-
 def open_file():
     filepath = filedialog.askopenfilename()
     if filepath != "":
@@ -96,17 +93,17 @@ def open_file():
                     logs.write(f'{datetime.now()}\nОшибка: Выбран не текстовый файл\n\n')
 
 def save_file():
-    filepath = filedialog.asksaveasfilename()
+    filepath = filedialog.asksaveasfilename(defaultextension='mon')
     if filepath != "":
         code = AppTools.encode(data)
         encoded = ''.join(code[ch] for ch in data)
-        with open(filepath, "w") as file:
+        with open(filepath, "wb") as file:
             try:
                 file.write(encoded)
                 with open('AppTools\\logs.txt', 'a', encoding='UTF-8') as logs:
                     logs.write(f'{datetime.now()}\nУспешное сохранение {filepath}\n\n')
             except Exception:
-                with open('AppTools\\logs.tx', 'a', encoding='UTF-8') as logs:
+                with open('AppTools\\logs.txt', 'a', encoding='UTF-8') as logs:
                     logs.write(f'{datetime.now()}\nОшибка: Что-то пошло не так\n\n')
 
 #кнопки
