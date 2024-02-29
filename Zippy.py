@@ -1,13 +1,13 @@
-import AppTools #самописная библиотека (Надстройка для customtkinter)
-import Huffman #самописная библиотека (Алгоритм Хаффмана)
+import AppTools #самописный пакет
 import customtkinter
 from tkinter import *
 from datetime import datetime
 from tkinter import filedialog
 
+#стандартное создание окна приложения
 app = customtkinter.CTk()  
 app.title("Zippy")
-app.iconbitmap(default="Zippy icon.ico")
+app.iconbitmap(default="AppTools\\Zippy icon.ico")
 app.geometry("900x700")
 app.resizable(False, False)
 
@@ -25,6 +25,7 @@ counter_textbox.grid(row=0, column=1, padx=20, pady=55, sticky='nw')
 code_textbox = customtkinter.CTkTextbox(app, width=600)    
 code_textbox.grid(row=1, column=1, padx=20, pady=35, sticky='nw')
 
+#подписи
 zippy_logo = AppTools.Labels(
     label_master=sidebar_frame, 
     label_name='Zippy', 
@@ -56,24 +57,7 @@ code_label = AppTools.Labels(
     label_sticky='nw' 
 )
 
-def open_file():
-    filepath = filedialog.askopenfilename()
-    if filepath != "":
-        with open(filepath, "r", encoding= "UTF-8") as file: 
-            global data
-            global counter            
-            try:
-                data = file.read()             
-                counter = {}    
-                char_counter(data)
-                counter_textbox_print() 
-                code_textbox_print()
-                with open('logs.txt', 'a', encoding='UTF-8') as logs:
-                    logs.write(f'{datetime.now()}\nУспешное кодирование {filepath}\n\n')
-            except UnicodeDecodeError:
-                with open('logs.txt', 'a', encoding='UTF-8') as logs:
-                    logs.write(f'{datetime.now()}\nОшибка: Выбран не текстовый файл\n\n')
-
+#функции
 def char_counter(sym_data):
     for i in sym_data:
         if i in counter:
@@ -86,19 +70,58 @@ def counter_textbox_print():
         counter_textbox.insert(END, f''''{i}' - {counter[i]}''' + '\n')
 
 def code_textbox_print():
-    code = Huffman.encode(data)
+    code = AppTools.encode(data)
     for ch in code:
         code_textbox.insert(END, f''''{ch}' - {code[ch]}''' + '\n')
 
-def logs_textbox_print(data):
-    code_textbox.insert(END, f''''{data}''' + '\n')
+def open_file():
+    filepath = filedialog.askopenfilename()
+    if filepath != "":
+        with open(filepath, "r", encoding= "UTF-8") as file: 
+            global data
+            global counter            
+            try:
+                data = file.read()             
+                counter = {}    
+                char_counter(data)
+                counter_textbox_print() 
+                code_textbox_print()
+                with open('AppTools\\logs.txt', 'a', encoding='UTF-8') as logs:
+                    logs.write(f'{datetime.now()}\nУспешное кодирование {filepath}\n\n')
+            except UnicodeDecodeError:
+                with open('AppTools\\logs.tx', 'a', encoding='UTF-8') as logs:
+                    logs.write(f'{datetime.now()}\nОшибка: Выбран не текстовый файл\n\n')
 
+def save_file():
+    filepath = filedialog.asksaveasfilename(defaultextension='mon')
+    if filepath != "":
+        code = AppTools.encode(data)
+        encoded = ''.join(code[ch] for ch in data)
+        with open(filepath, "wb") as file:
+            try:
+                file.write(encoded)
+                with open('AppTools\\logs.txt', 'a', encoding='UTF-8') as logs:
+                    logs.write(f'{datetime.now()}\nУспешное сохранение {filepath}\n\n')
+            except Exception:
+                with open('AppTools\\logs.txt', 'a', encoding='UTF-8') as logs:
+                    logs.write(f'{datetime.now()}\nОшибка: Что-то пошло не так\n\n')
+
+#кнопки
 open_file_button = AppTools.Buttons(
     button_master=app,
     button_name='Open file',
     button_func=open_file,
     button_relx=0.025,
     button_rely=0.15,
+    button_anchor=NW
+)  
+
+save_file_button = AppTools.Buttons(
+    button_master=app,
+    button_name='Save file',
+    button_func=save_file,
+    button_relx=0.025,
+    button_rely=0.2,
     button_anchor=NW
 )  
 

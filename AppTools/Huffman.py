@@ -35,3 +35,6 @@ def encode(data):
     root.walk(code, '')
     
     return code  
+
+def decode():
+    ... #функция, которая будет декодировать 
