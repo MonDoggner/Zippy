@@ -36,5 +36,4 @@ def encode(data):
     
     return code  
 
-def decode():
-    ... #функция, которая будет декодировать 
+

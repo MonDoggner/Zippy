@@ -3,15 +3,16 @@
 '''
 import customtkinter
 from tkinter import *
-from datetime import datetime
 from tkinter import filedialog
+from datetime import datetime
+from PIL import Image
 
 class Buttons():
     '''
     Класс, создающий кнопки.
     Теперь мы можем размещать их без отдельной функции!
     '''
-    def __init__(self, button_master:any, button_name, button_relx, button_rely, button_anchor, button_func) -> None:
+    def __init__(self, button_master:any, button_name, button_relx, button_rely, button_anchor, button_func, button_image:None) -> None:
 
         self.button_master = button_master
         self.button_name = button_name
@@ -19,6 +20,7 @@ class Buttons():
         self.button_rely = button_rely
         self.button_anchor = button_anchor
         self.button_func = button_func
+        self.button_image = button_image
 
         button = customtkinter.CTkButton(
             master=self.button_master,
@@ -28,6 +30,7 @@ class Buttons():
             corner_radius=8,
             text=self.button_name,
             font=('system', 20),
+            image=customtkinter.CTkImage(dark_image=Image.open(self.button_image)),
             command=self.button_func
         )    
         button.place(relx=self.button_relx, rely=self.button_rely, anchor=self.button_anchor)
