@@ -9,6 +9,7 @@ import time
 from tkinter import *
 from tkinter import filedialog
 from datetime import datetime
+from PIL import Image
 
 #===================================================================
 
@@ -28,8 +29,8 @@ sidebar_frame.grid_rowconfigure(4, weight=1)
 
 #===================================================================
 
-def char_counter(sym_data):
-    for i in sym_data:
+def char_counter(char_data):
+    for i in char_data:
         if i in counter:
             counter[i] += 1
         else:
@@ -57,31 +58,22 @@ def code_textbox_print():
 
 def open_file():
     global filepath
-    filepath = filedialog.askopenfilename()
+    filepath = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
     if filepath != "":
         with open(filepath, "r", encoding= "UTF-8") as file: 
             
             global file_name #Самые важные переменные. Без них всё поломается
             global data
-            global counter
-                       
-            try:
+            global counter                       
 
-                file_name = os.path.basename(filepath)
-                data = file.read()             
-                counter = {}    
+            file_name = os.path.basename(filepath)
+            data = file.read()             
+            counter = {}    
                 
-                char_counter(data)
-                counter_textbox_print()
-                progress_bar() 
-                code_textbox_print()
-                
-                with open('AppTools\\logs.txt', 'a', encoding='UTF-8') as logs:
-                    logs.write(f'{datetime.now()}\nУспешное кодирование {file_name}\n\n')
-
-            except UnicodeDecodeError:
-                with open('AppTools\\logs.txt', 'a', encoding='UTF-8') as logs:
-                    logs.write(f'{datetime.now()}\nОшибка: Выбран не текстовый файл\n\n')
+            char_counter(data)
+            counter_textbox_print()
+            progress_bar() 
+            code_textbox_print()
 
 def save_file():
     save_filepath = filedialog.asksaveasfilename(
@@ -92,19 +84,61 @@ def save_file():
     )
     
     if save_filepath != "":
-        try:
-            
-            temp_dir = tempfile.mkdtemp()
-            shutil.copy(filepath, temp_dir)            
-            temp_archive = shutil.make_archive(base_name=save_filepath, format='zip', root_dir=temp_dir)
-            os.rename(temp_archive, save_filepath)
+        progress_bar()
+        temp_dir = tempfile.mkdtemp()
+        shutil.copy(filepath, temp_dir)            
+        temp_archive = shutil.make_archive(base_name=save_filepath, format='zip', root_dir=temp_dir)
+        os.rename(temp_archive, save_filepath)
 
-            with open('AppTools\\logs.txt', 'a', encoding='UTF-8') as logs:
-                logs.write(f'{datetime.now()}\nУспешное сохранение {file_name}\n\n')
+about_counter = 0
 
-        except Exception as e:
-            with open('AppTools\\logs.txt', 'a', encoding='UTF-8') as logs:
-                logs.write(f'{datetime.now()}\nОшибка: {e}\n\n')
+def about():
+
+    global about_counter     
+    about_counter += 1
+
+    about_image = customtkinter.CTkImage(
+        light_image=Image.open('assets\photo_2024-03-12_22-53-28.jpg'),
+        dark_image=Image.open('assets\photo_2024-03-12_22-53-28.jpg'),
+        size=(200, 200)
+    )
+
+    if about_counter % 3 != 0:
+
+        about_window = customtkinter.CTkToplevel()
+        about_window.title('About')
+        about_window.geometry('300x400')
+        about_window.resizable(False, False)
+
+        about_label = customtkinter.CTkLabel(
+            master=about_window, 
+            text='Zippy',
+            font=('system', 40),
+        )
+        about_label.pack(expand=True)
+
+        about_textbox = customtkinter.CTkTextbox(about_window, width=210, height=250) 
+        about_textbox.pack(expand=True)
+        about_textbox.insert(END, '''============Zippy===========\n\nО программе:\n-Архиватор текстовых файлов.\n\nВерсия:\n1.0\n\n===========================\n\nРазработал:\n-Бухаров Арсений\n\nРуководитель:\n-Суханов Леонид Николаевич''')
+    else:
+        about_window = customtkinter.CTkToplevel()
+        about_window.title('About')
+        about_window.geometry('300x400')
+        about_window.resizable(False, False)
+
+        i_about_label = customtkinter.CTkLabel(
+            master=about_window, 
+            text='',
+            image=about_image
+        )
+        i_about_label.pack(expand=True)
+
+        s_about_label = customtkinter.CTkLabel(
+            master=about_window, 
+            text='Спасибо, что пользуешься, чумба!\nДобра, позитива, carpe diem',
+            font=('system', 22),
+        )
+        s_about_label.pack(expand=True)    
 
 #===================================================================
                 
@@ -156,7 +190,7 @@ open_file_button = AppTools.Buttons(
     button_name='Open file',
     button_image = 'assets\\open.png',
     button_func=open_file,
-    button_relx=0.17,
+    button_relx=0.15,
     button_rely=0.2,
     button_anchor=NW
 )  
@@ -166,7 +200,7 @@ save_file_button = AppTools.Buttons(
     button_name='Save file',
     button_image = 'assets\\save.png',
     button_func=save_file,
-    button_relx=0.17,
+    button_relx=0.15,
     button_rely=0.25,
     button_anchor=NW
 )  
@@ -175,7 +209,7 @@ about_button = AppTools.Buttons(
     button_master=sidebar_frame,
     button_name='About',
     button_image = 'assets\\about.png',
-    button_func=...,
+    button_func=about,
     button_relx=0.17,
     button_rely=0.9,
     button_anchor=NW
