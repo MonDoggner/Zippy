@@ -7,7 +7,7 @@
 import AppTools #самописный пакет
 import customtkinter
 import os
-import tempfile
+import zipfile
 import shutil
 import time
 from tkinter import *
@@ -71,7 +71,7 @@ def open_file():
     filepath = filedialog.askopenfilename(filetypes=[('Текстовые файлы', '*.txt')])
 
     if filepath != '':
-        with open(filepath, 'r', encoding= 'UTF-8') as file: 
+        with open(filepath, 'r') as file: 
             
             global file_name #Самые важные переменные. Без них всё поломается
             global data
@@ -87,28 +87,30 @@ def open_file():
             code_textbox_print()
 
 def save_file():
-    
     save_filepath = filedialog.asksaveasfilename(
         initialdir=r'C:\Users\admin\Downloads',
         initialfile=f'{os.path.splitext(file_name)[0]}',
-        filetypes=[('Архив','.zip')], 
+        filetypes=[('Archive', '.zip')],
         defaultextension='.zip'
     )
-    
+
     if save_filepath != "":
         progress_bar()
-        temp_dir = tempfile.mkdtemp()
-        shutil.copy(filepath, temp_dir)            
-        temp_archive = shutil.make_archive(base_name=save_filepath, format='zip', root_dir=temp_dir)
-        os.rename(temp_archive, save_filepath)
+        with zipfile.ZipFile(save_filepath, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as zip_file:
+            zip_file.write(filepath, os.path.basename(filepath))
+
+def select_extract_dir():
+    extract_dir = filedialog.askdirectory()
+    return extract_dir
 
 def unpack_zip():
-
     zip_filepath = filedialog.askopenfilename()
 
     if zip_filepath != '':
-        progress_bar()
-        shutil.unpack_archive(filename=zip_filepath, extract_dir=r'C:\Users\admin\Downloads',)
+        extract_dir = select_extract_dir()
+        if extract_dir:
+            progress_bar()
+            shutil.unpack_archive(filename=zip_filepath, extract_dir=extract_dir)
 
 about_counter = 0
 
@@ -142,7 +144,7 @@ def about():
         about_textbox.insert(END, 
 '''============Zippy===========\n
 О программе:\n-Архиватор текстовых файлов.\n
-Версия:\n1.0\n===========================\n
+Версия:\n1.1\n===========================\n
 Разработал:\n-Бухаров Арсений\n
 Руководитель:\n-Суханов Леонид Николаевич''')
         
