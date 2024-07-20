@@ -68,10 +68,10 @@ def code_textbox_print():
 def open_file():
 
     global filepath
-    filepath = filedialog.askopenfilename(filetypes=[('Текстовые файлы', '*.txt')])
+    filepath = filedialog.askopenfilename(filetypes=[('Текстовые файлы', '*.txt'), ('Текстовые файлы', '*.odt'), ('Текстовые файлы', '*.docx')])
 
     if filepath != '':
-        with open(filepath, 'r') as file: 
+        with open(filepath, 'r', encoding='latin-1') as file: 
             
             global file_name #Самые важные переменные. Без них всё поломается
             global data
