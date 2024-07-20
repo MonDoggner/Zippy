@@ -1,9 +1,13 @@
+'''
+Архиватор, демонстрирующий работу алгоритма Хаффмана
+'''
+
 #===================================================================
 
 import AppTools #самописный пакет
 import customtkinter
 import os
-import tempfile
+import zipfile
 import shutil
 import time
 from tkinter import *
@@ -13,9 +17,9 @@ from PIL import Image
 #===================================================================
 
 app = customtkinter.CTk()  
-app.title("Zippy")
+app.title('Zippy')
 app.iconbitmap(default=os.path.join(os.path.dirname(__file__), 'assets', 'Zippy icon.ico'))
-app.geometry("900x700")
+app.geometry('900x700')
 app.resizable(False, False)
 
 app.grid_columnconfigure(1, weight=1)
@@ -23,23 +27,27 @@ app.grid_columnconfigure((2, 3), weight=0)
 app.grid_rowconfigure((0, 1, 2), weight=1)
 
 sidebar_frame = customtkinter.CTkFrame(app, width=200, corner_radius=0)
-sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
+sidebar_frame.grid(row=0, column=0, rowspan=4, sticky='nsew')
 sidebar_frame.grid_rowconfigure(4, weight=1)
 
 #===================================================================
 
 def char_counter(char_data):
     for i in char_data:
+
         if i in counter:
             counter[i] += 1
+
         else:
             counter[i] = 1
 
 def counter_textbox_print():
+
     for i in counter:
         counter_textbox.insert(END, f''''{i}' - {counter[i]}''' + '\n')
 
 def progress_bar():
+        
         zippy_progress_bar['maximum'] = 100    
     
         for i in range(101):
@@ -51,15 +59,19 @@ def progress_bar():
         zippy_progress_bar['value'] = 0
         
 def code_textbox_print():
+
     code = AppTools.encode(data)
+
     for ch in code:
         code_textbox.insert(END, f''''{ch}' - {code[ch]}''' + '\n')
 
 def open_file():
+
     global filepath
-    filepath = filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])
-    if filepath != "":
-        with open(filepath, "r", encoding= "UTF-8") as file: 
+    filepath = filedialog.askopenfilename(filetypes=[('Текстовые файлы', '*.txt'), ('Текстовые файлы', '*.odt'), ('Текстовые файлы', '*.docx')])
+
+    if filepath != '':
+        with open(filepath, 'r', encoding='latin-1') as file: 
             
             global file_name #Самые важные переменные. Без них всё поломается
             global data
@@ -78,16 +90,27 @@ def save_file():
     save_filepath = filedialog.asksaveasfilename(
         initialdir=r'C:\Users\admin\Downloads',
         initialfile=f'{os.path.splitext(file_name)[0]}',
-        filetypes=[('Архив','.zip')], 
+        filetypes=[('Archive', '.zip')],
         defaultextension='.zip'
     )
-    
+
     if save_filepath != "":
         progress_bar()
-        temp_dir = tempfile.mkdtemp()
-        shutil.copy(filepath, temp_dir)            
-        temp_archive = shutil.make_archive(base_name=save_filepath, format='zip', root_dir=temp_dir)
-        os.rename(temp_archive, save_filepath)
+        with zipfile.ZipFile(save_filepath, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as zip_file:
+            zip_file.write(filepath, os.path.basename(filepath))
+
+def select_extract_dir():
+    extract_dir = filedialog.askdirectory()
+    return extract_dir
+
+def unpack_zip():
+    zip_filepath = filedialog.askopenfilename()
+
+    if zip_filepath != '':
+        extract_dir = select_extract_dir()
+        if extract_dir:
+            progress_bar()
+            shutil.unpack_archive(filename=zip_filepath, extract_dir=extract_dir)
 
 about_counter = 0
 
@@ -121,7 +144,7 @@ def about():
         about_textbox.insert(END, 
 '''============Zippy===========\n
 О программе:\n-Архиватор текстовых файлов.\n
-Версия:\n1.0\n===========================\n
+Версия:\n1.1\n===========================\n
 Разработал:\n-Бухаров Арсений\n
 Руководитель:\n-Суханов Леонид Николаевич''')
         
@@ -200,13 +223,23 @@ open_file_button = AppTools.Buttons(
     button_anchor=NW
 )  
 
+unpack_zip_button = AppTools.Buttons(
+    button_master=sidebar_frame,
+    button_name='Unpack  ',
+    button_image = os.path.join(os.path.dirname(__file__), 'assets', 'open.png'),
+    button_func=unpack_zip,
+    button_relx=0.15,
+    button_rely=0.25,
+    button_anchor=NW
+)
+
 save_file_button = AppTools.Buttons(
     button_master=sidebar_frame,
     button_name='Save file',
     button_image = os.path.join(os.path.dirname(__file__), 'assets', 'save.png'),
     button_func=save_file,
     button_relx=0.15,
-    button_rely=0.25,
+    button_rely=0.3,
     button_anchor=NW
 )  
 
