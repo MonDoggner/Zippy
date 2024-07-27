@@ -48,6 +48,13 @@ def counter_textbox_print():
 
 def progress_bar():
         
+        download = customtkinter.CTkLabel(
+            master=app, 
+            text='    Загрузка...', 
+            font=('system', 22)
+        )
+        download.grid(row=0, column=1, padx=330, pady=0, sticky='se')
+
         zippy_progress_bar['maximum'] = 100    
     
         for i in range(101):
@@ -57,6 +64,8 @@ def progress_bar():
             time.sleep(0.1)        
         
         zippy_progress_bar['value'] = 0
+
+        download.destroy()
         
 def code_textbox_print():
 
@@ -112,6 +121,10 @@ def unpack_zip():
             progress_bar()
             shutil.unpack_archive(filename=zip_filepath, extract_dir=extract_dir)
 
+def clear_textbox():
+    counter_textbox.delete('1.0', END)
+    code_textbox.delete('1.0', END)
+
 about_counter = 0
 
 def about():
@@ -144,7 +157,7 @@ def about():
         about_textbox.insert(END, 
 '''============Zippy===========\n
 О программе:\n-Архиватор текстовых файлов.\n
-Версия:\n1.1\n===========================\n
+Версия:\n1.2\n===========================\n
 Разработал:\n-Бухаров Арсений\n
 Руководитель:\n-Суханов Леонид Николаевич''')
         
@@ -213,6 +226,8 @@ code_label = AppTools.Labels(
     label_sticky='nw' 
 )
 
+
+
 open_file_button = AppTools.Buttons(
     button_master=sidebar_frame,
     button_name='Open file',
@@ -250,6 +265,16 @@ about_button = AppTools.Buttons(
     button_func=about,
     button_relx=0.17,
     button_rely=0.9,
+    button_anchor=NW
+)
+
+clear_button = AppTools.Buttons(
+    button_master=app,
+    button_name='Clear',
+    button_image = os.path.join(os.path.dirname(__file__), 'assets', 'clear.png'),
+    button_func=clear_textbox,
+    button_relx=0.75,
+    button_rely=0.485,
     button_anchor=NW
 )
 

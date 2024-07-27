@@ -3,8 +3,6 @@
 '''
 import customtkinter
 from tkinter import *
-from tkinter import filedialog
-from datetime import datetime
 from PIL import Image
 
 class Buttons:
@@ -57,3 +55,5 @@ class Labels:
             font=self.label_font
         )
         label.grid(row=self.label_row, column=self.label_column, padx=self.label_padx, pady=self.label_pady, sticky=self.label_sticky)
+    
+    
